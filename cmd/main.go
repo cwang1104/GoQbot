@@ -3,7 +3,17 @@ package main
 import (
 	"log"
 	"qbot/api"
+	"qbot/db"
 )
+
+func init() {
+	err := db.DbInit()
+	if err != nil {
+		log.Println("DBinit failed", err)
+		return
+	}
+	log.Println("db init success")
+}
 
 func main() {
 	server := api.NewServer("12000")

@@ -1,4 +1,4 @@
-package bothttp
+package http
 
 import (
 	"fmt"
@@ -36,11 +36,6 @@ func DelJob(c *gin.Context) {
 	cro.cro.Stop()
 	cro.status = 2
 	fmt.Println("ok")
-}
-
-func AddDsq(c *gin.Context) {
-	name := "test"
-	Addcro(name)
 }
 
 func Addcro(name string) {

@@ -3,7 +3,8 @@ package api
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"qbot/api/bothttp"
+	"qbot/api/http"
+	"qbot/api/middleware"
 	"qbot/api/socket"
 )
 
@@ -23,13 +24,27 @@ func NewServer(port string) *Server {
 func (s *Server) setRouter() {
 	r := gin.Default()
 
-	//  @全体成员
-	r.GET("/at_all_member", bothttp.AtAllMember)
+	//跨域请求
+	r.Use(middleware.Cors())
 
-	//定时器测试
-	r.GET("/cro", bothttp.AddDsq)
-	r.GET("/del", bothttp.DelJob)
-	r.GET("/list", bothttp.JobList)
+	//注册与登录
+	r.POST("/register", http.UserRegister)
+	r.POST("/login", http.CheckLogin)
+
+	//机器人操作
+	botGroup := r.Group("/bot")
+	{
+		//token校验
+		botGroup.Use(middleware.AuthToken())
+
+		//  @全体成员
+		botGroup.POST("/at_all_member", http.AtAllMember)
+
+		//定时器测试
+		botGroup.POST("/cro", http.AddDsq)
+		botGroup.POST("/del", http.DelJob)
+		botGroup.POST("/list", http.JobList)
+	}
 
 	//websocket服务
 	r.GET("/ws/bot", socket.BotWs)

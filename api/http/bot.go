@@ -1,9 +1,9 @@
-package bothttp
+package http
 
 import (
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"qbot/bot"
+	http2 "qbot/bot/http"
 )
 
 type AtAllReq struct {
@@ -12,7 +12,7 @@ type AtAllReq struct {
 
 func AtAllMember(c *gin.Context) {
 
-	deal := bot.NewMemberDeal(527388259, 0, false)
+	deal := http2.NewMemberDeal(527388259, 0, false)
 	err := deal.AtAllMember()
 
 	if err != nil {

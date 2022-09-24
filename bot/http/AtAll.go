@@ -1,4 +1,4 @@
-package bot
+package http
 
 import (
 	"bytes"
@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"qbot/bot"
 )
 
 const (
@@ -20,9 +21,9 @@ type GroupMemberDeal struct {
 }
 
 type MemberListResp struct {
-	Data    []MemberInfo `json:"data"`
-	RetCode int          `json:"retcode"`
-	Status  string       `json:"status"`
+	Data    []bot.MemberInfo `json:"data"`
+	RetCode int              `json:"retcode"`
+	Status  string           `json:"status"`
 }
 
 func NewMemberDeal(groupId, userId int64, cache bool) *GroupMemberDeal {
@@ -35,7 +36,7 @@ func NewMemberDeal(groupId, userId int64, cache bool) *GroupMemberDeal {
 
 func (g *GroupMemberDeal) GetMemberInfoList() (*MemberListResp, error) {
 
-	sendMsg := GetMemberList{
+	sendMsg := bot.GetMemberList{
 		GroupId: g.GroupId,
 		NoCache: g.NoCache,
 	}
@@ -112,7 +113,7 @@ func (g *GroupMemberDeal) AtAllMember() error {
 
 func (g *GroupMemberDeal) SendGroupMsg(msg string, autoEscape bool) error {
 
-	sendMsg := SendGroupMsg{
+	sendMsg := bot.SendGroupMsg{
 		GroupID:    g.GroupId,
 		Message:    msg,
 		AutoEscape: autoEscape,

@@ -1,6 +1,6 @@
 package bot
 
-// 成员信息
+//MemberInfo 成员信息
 type MemberInfo struct {
 	GroupId         int64  `json:"group_id"`
 	UserId          int64  `json:"user_id"`
@@ -20,7 +20,7 @@ type MemberInfo struct {
 	ShutUpTimestamp int64  `json:"shut_up_timestamp"`
 }
 
-//发送消息api请求参数
+//SendPrivatePMsg 发送私聊消息api请求参数
 type SendPrivatePMsg struct {
 	UserID     int64  `json:"user_id"`
 	GroupID    int64  `json:"group_id"`
@@ -28,12 +28,13 @@ type SendPrivatePMsg struct {
 	AutoEscape bool   `json:"auto_escape"`
 }
 
-//获取群成员api请求参数
+//GetMemberList 获取群成员api请求参数
 type GetMemberList struct {
 	GroupId int64 `json:"group_id"`
 	NoCache bool  `json:"no_cache"`
 }
 
+//SendGroupMsg 发送群消息api请求参数
 type SendGroupMsg struct {
 	GroupID    int64  `json:"group_id"`
 	Message    string `json:"message"`

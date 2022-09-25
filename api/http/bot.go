@@ -12,6 +12,22 @@ import (
 	"time"
 )
 
+type TimeTaskResp struct {
+	Id             int          `json:"id"`
+	CreatedId      int          `json:"created_id"`
+	TaskName       string       `json:"task_name"`
+	TimedStart     int          `json:"timed_start"`
+	StartTime      int64        `json:"start_time"`
+	TimedEnd       int          `json:"timed_end"`
+	EndTime        int64        `json:"end_time"`
+	TimingStrategy TimeStrategy `json:"timing_strategy"`
+	TimerType      int          `json:"timer_type"`
+	SentContent    string       `json:"sent_content"`
+	SendTo         int64        `json:"send_to"`
+	Status         int          `json:"status"`
+	CreatedTime    int64        `json:"created_time"`
+}
+
 type AddTimedTaskReq struct {
 	TaskName       string `json:"task_name"`
 	TimedStart     int    `json:"timed_start"`
@@ -25,7 +41,7 @@ type AddTimedTaskReq struct {
 	} `json:"timing_strategy"`
 	TimerType   int    `json:"timer_type"`
 	SentContent string `json:"sent_content"`
-	SendTo      int    `json:"send_to"`
+	SendTo      int64  `json:"send_to"`
 }
 
 //TimeStrategy 时间策略
@@ -173,12 +189,32 @@ func GetUserTaskList(c *gin.Context) {
 		})
 		return
 	}
-
+	var tasksResp []TimeTaskResp
+	for _, task := range *tasks {
+		var strategy TimeStrategy
+		_ = json.Unmarshal([]byte(task.TimingStrategy), &strategy)
+		taskResp := TimeTaskResp{
+			Id:             task.Id,
+			CreatedId:      task.CreatedId,
+			TaskName:       task.TaskName,
+			TimedStart:     task.TimedStart,
+			StartTime:      task.StartTime,
+			TimedEnd:       task.TimedEnd,
+			EndTime:        task.EndTime,
+			TimingStrategy: strategy,
+			TimerType:      task.TimerType,
+			SentContent:    task.SentContent,
+			SendTo:         task.SendTo,
+			Status:         task.Status,
+			CreatedTime:    task.CreatedTime,
+		}
+		tasksResp = append(tasksResp, taskResp)
+	}
 	c.JSON(http.StatusOK, gin.H{
 		"code": 0,
 		"msg":  "success",
 		"data": gin.H{
-			"tasks": tasks,
+			"tasks": tasksResp,
 		},
 	})
 }

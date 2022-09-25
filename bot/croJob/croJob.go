@@ -2,8 +2,6 @@ package croJob
 
 import (
 	"encoding/json"
-	"errors"
-	"fmt"
 	"github.com/robfig/cron"
 	"log"
 	"qbot/db"
@@ -27,7 +25,7 @@ type CronJob struct {
 	TimedEnd       int
 	EndTime        int64
 	Content        string
-	SendTo         int
+	SendTo         int64
 	TimingStrategy *TimeStrategy
 	TimerType      int
 	Status         int
@@ -71,37 +69,41 @@ func NewCronJob(timedTask *db.TimedTaskModel) (*CronJob, error) {
 //StartCronJob 开启定时器
 func (c *CronJob) StartCronJob() {
 
-	spec := utils.GetInternalSpec(c.TimingStrategy.Interval, c.TimingStrategy.TimeLimitStart, c.TimingStrategy.TimeLimitEnd)
-	log.Println("--------cron func", spec)
-
-	_ = c.cro.AddFunc(spec, func() {
-		fmt.Println("task start")
-	})
-
-	//添加进TimeTaskList
-	taskName := utils.GetTimeTaskName(c.TaskName, c.TaskId)
-	err := AddTimedTask(c)
+	spec, err := utils.GetInternalSpec(c.TimingStrategy.Interval, c.TimingStrategy.TimeLimitStart, c.TimingStrategy.TimeLimitEnd)
 	if err != nil {
-		log.Println("AddTimedTask failed", err)
+		log.Println("GetInternalSpec failed", err)
 		return
 	}
+	log.Println("--------cron func", spec)
+
+	err = c.cro.AddFunc(spec, func() {
+		SendMsg("private", c.SendTo, c.Content)
+	})
+	if err != nil {
+		log.Println("AddFunc", err)
+		return
+	}
+	//添加进TimeTaskList
+	taskName := utils.GetTimeTaskName(c.TaskName, c.TaskId)
+	AddTimedTask(c)
+
 	//检验是否 定时启动和定时关闭
 	if c.TimedStart == 1 {
-		err := db.UpdateTaskStatus(1, c.TaskId)
-		if err != nil {
-			log.Println("UpdateTaskStatus failed", err)
-			return
-		}
-		for {
-			if time.Now().Unix() == c.StartTime {
-				c.cro.Start()
-				err := db.UpdateTaskStatus(2, c.TaskId)
-				if err != nil {
-					log.Println("UpdateTaskStatus failed", err)
-					return
+		go func() {
+			for {
+				if time.Now().Unix() == c.StartTime {
+					c.cro.Start()
+					err := db.UpdateTaskStatus(2, c.TaskId)
+					if err != nil {
+						log.Println("UpdateTaskStatus failed", err)
+						return
+					}
+					log.Println("任务开始", c.TaskName)
+					break
 				}
 			}
-		}
+		}()
+
 	} else {
 		c.cro.Start()
 		err := db.UpdateTaskStatus(2, c.TaskId)
@@ -109,21 +111,26 @@ func (c *CronJob) StartCronJob() {
 			log.Println("UpdateTaskStatus failed", err)
 			return
 		}
+		log.Println("任务开始", c.TaskName)
 	}
 
 	//定时关闭
 	if c.TimedEnd == 1 {
-		for {
-			if time.Now().Unix() == c.EndTime {
-				c.cro.Stop()
-				DelTimedTask(taskName)
-				err := db.UpdateTaskStatus(3, c.TaskId)
-				if err != nil {
-					log.Println("UpdateTaskStatus failed", err)
-					return
+		go func() {
+			for {
+				if time.Now().Unix() == c.EndTime {
+					c.cro.Stop()
+					DelTimedTask(taskName)
+					err := db.UpdateTaskStatus(3, c.TaskId)
+					if err != nil {
+						log.Println("UpdateTaskStatus failed", err)
+						return
+					}
+					log.Println("任务结束", c.TaskName)
+					break
 				}
 			}
-		}
+		}()
 	}
 }
 
@@ -139,17 +146,12 @@ func (c *CronJob) StopCronJob() {
 }
 
 // AddTimedTask 添加定时任务到map
-func AddTimedTask(cronJob *CronJob) error {
+func AddTimedTask(cronJob *CronJob) {
 	TimeLock.Lock()
 	taskName := utils.GetTimeTaskName(cronJob.TaskName, cronJob.TaskId)
-	_, exist := GetTimedTask(taskName)
-	if exist {
-		TimeLock.Unlock()
-		return errors.New("task is exist")
-	}
 	TimedTaskList[taskName] = cronJob
 	TimeLock.Unlock()
-	return nil
+	return
 }
 
 //GetTimedTask 获取定时任务

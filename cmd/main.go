@@ -9,7 +9,7 @@ import (
 func init() {
 	err := db.DbInit()
 	if err != nil {
-		log.Println("DBinit failed", err)
+		log.Println("DB init failed", err)
 		return
 	}
 	log.Println("db init success")

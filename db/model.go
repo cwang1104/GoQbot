@@ -18,7 +18,7 @@ type TimedTaskModel struct {
 	TimingStrategy string `json:"timing_strategy"`
 	TimerType      int    `json:"timer_type"`
 	SentContent    string `json:"sent_content"`
-	SendTo         int    `json:"send_to"`
+	SendTo         int64  `json:"send_to"`
 	Status         int    `json:"status"`
 	CreatedTime    int64  `json:"created_time"`
 }

@@ -68,6 +68,7 @@ func NewCronJob(timedTask *db.TimedTaskModel) (*CronJob, error) {
 	}, nil
 }
 
+//StartCronJob 开启定时器
 func (c *CronJob) StartCronJob() {
 
 	spec := utils.GetInternalSpec(c.TimingStrategy.Interval, c.TimingStrategy.TimeLimitStart, c.TimingStrategy.TimeLimitEnd)

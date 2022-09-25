@@ -37,13 +37,14 @@ func (s *Server) setRouter() {
 		//token校验
 		botGroup.Use(middleware.AuthToken())
 
-		//  @全体成员
-		botGroup.POST("/at_all_member", http.AtAllMember)
+		//定时器
+		botGroup.POST("/add_task", http.AddCronJob)
+		botGroup.POST("/stop_task", http.StopTimeTask)
+		botGroup.POST("/get_task_list", http.GetUserTaskList)
 
-		//定时器测试
-		botGroup.POST("/cro", http.AddDsq)
-		botGroup.POST("/del", http.DelJob)
-		botGroup.POST("/list", http.JobList)
+		//  @全体成员
+		//botGroup.POST("/at_all_member", http.AtAllMember)
+
 	}
 
 	//websocket服务

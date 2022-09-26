@@ -1,5 +1,5 @@
 # GoQbot
-基于golang、go-cqhttp实现的qq机器人
+基于golang、go-cqhttp实现的qq机器人，支持定时任务管理、群聊管理等功能
 
 ### go-cqhttp相关文档：
 [https://github.com/Mrs4s/go-cqhttp](https://github.com/Mrs4s/go-cqhttp)

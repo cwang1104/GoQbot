@@ -1,0 +1,29 @@
+
+mysql:
+  dbAddress: 127.0.0.1:13306
+  dbUserName: root
+  dbPassword: openIM
+  dbName: bonds
+  dbMaxOpenConns: 200
+  dbMaxIdleConns: 100
+  dbMaxLifeTime: 120
+
+server:
+  port: 12000
+
+#第三方平台的密钥
+thirdparty:
+  #天气预报调取高德api获取，对应的key
+  gaoDe:
+    key: xxxxxxxxxxxxxxxxx
+
+
+qqbot:
+  #qq机器人支持的天气查询地点 支持地区参考同天气查询api
+  weatherLocation:
+    #天气查询支持的地区，在此添加，具体的地区代码参照高德地图天气api文档
+    #方便qq内文字识别，此处用中文
+    成都: 510100
+    成都双流: 510116
+    眉山: 511403
+    绵阳: 510700

@@ -4,6 +4,7 @@ import (
 	"log"
 	"qbot/api"
 	"qbot/db"
+	"qbot/utils"
 )
 
 func init() {
@@ -16,7 +17,8 @@ func init() {
 }
 
 func main() {
-	server := api.NewServer("12000")
+	server := api.NewServer(utils.GlobalConf.Server.Port)
+
 	err := server.RunServer("127.0.0.1")
 	if err != nil {
 		log.Println("run server failed", err)

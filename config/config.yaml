@@ -2,20 +2,20 @@
 mysql:
   dbAddress: 127.0.0.1:13306
   dbUserName: root
-  dbPassword: openIM
-  dbName: bonds
+  dbPassword: 4524
+  dbName: gqbot
   dbMaxOpenConns: 200
   dbMaxIdleConns: 100
   dbMaxLifeTime: 120
 
 server:
-  port: 12000
+  port: 56001
 
 #第三方平台的密钥
 thirdparty:
   #天气预报调取高德api获取，对应的key
   gaoDe:
-    key: xxxxxxxxxxxxxxxxx
+    key: 70952621f87214cfad6c8f62ed61d44e
 
 
 qqbot:

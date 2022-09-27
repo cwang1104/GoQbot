@@ -1,6 +1,6 @@
 
 mysql:
-  dbAddress: 127.0.0.1:13306
+  dbAddress: 127.0.0.1:3306
   dbUserName: root
   dbPassword: 4524
   dbName: gqbot
@@ -16,6 +16,7 @@ thirdparty:
   #天气预报调取高德api获取，对应的key
   gaoDe:
     key: 70952621f87214cfad6c8f62ed61d44e
+
 
 
 qqbot:

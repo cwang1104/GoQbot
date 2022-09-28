@@ -2,7 +2,9 @@ package http
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/gin-gonic/gin"
+	"io"
 	"log"
 	"net/http"
 	"qbot/api/middleware"
@@ -12,7 +14,7 @@ import (
 	"time"
 )
 
-type TimeTaskResp struct {
+type TimeTaskInfoResp struct {
 	Id             int          `json:"id"`
 	CreatedId      int          `json:"created_id"`
 	TaskName       string       `json:"task_name"`
@@ -21,10 +23,23 @@ type TimeTaskResp struct {
 	TimedEnd       int          `json:"timed_end"`
 	EndTime        int64        `json:"end_time"`
 	TimingStrategy TimeStrategy `json:"timing_strategy"`
-	TimerType      int          `json:"timer_type"`
+	TimerTypeId    int          `json:"timer_type_id"`
+	TimerTypeName  string       `json:"timer_type_name"`
+	TaskExplain    string       `json:"task_explain"`
+	SendType       string       `json:"send_type"`
 	SentContent    string       `json:"sent_content"`
 	SendTo         int64        `json:"send_to"`
 	Status         int          `json:"status"`
+	CreatedTime    int64        `json:"created_time"`
+}
+
+type TaskListResp struct {
+	Id             int          `json:"id"`
+	TaskName       string       `json:"task_name"`
+	TimerTypeName  string       `json:"timer_type_name"`
+	TimingStrategy TimeStrategy `json:"timing_strategy"`
+	Status         int          `json:"status"`
+	TaskExplain    string       `json:"task_explain"`
 	CreatedTime    int64        `json:"created_time"`
 }
 
@@ -39,7 +54,9 @@ type AddTimedTaskReq struct {
 		TimeLimitStart int `json:"time_limit_start"`
 		TimeLimitEnd   int `json:"time_limit_end"`
 	} `json:"timing_strategy"`
-	TimerType   int    `json:"timer_type"`
+	TimerTypeId int    `json:"timer_type_id"`
+	SendType    string `json:"send_type"`
+	TaskExplain string `json:"task_explain"`
 	SentContent string `json:"sent_content"`
 	SendTo      int64  `json:"send_to"`
 }
@@ -80,7 +97,9 @@ func AddCronJob(c *gin.Context) {
 		TimedEnd:       req.TimedEnd,
 		EndTime:        req.EndTime,
 		TimingStrategy: string(timingStrategyJson),
-		TimerType:      req.TimerType,
+		TimerTypeId:    req.TimerTypeId,
+		SendType:       req.SendType,
+		TaskExplain:    req.TaskExplain,
 		SentContent:    req.SentContent,
 		SendTo:         req.SendTo,
 		Status:         1,
@@ -167,6 +186,7 @@ func StopTimeTask(c *gin.Context) {
 type GetReq struct {
 	CurrentPage int `json:"current_page"`
 	PageSize    int `json:"page_size"`
+	Status      int `json:"status"`
 }
 
 func GetUserTaskList(c *gin.Context) {
@@ -179,37 +199,42 @@ func GetUserTaskList(c *gin.Context) {
 		})
 		return
 	}
+	log.Println("---------------")
+	fmt.Printf("%+v\n", req)
 	payload := c.MustGet(middleware.AuthorizationPayloadKey).(*utils.Claims)
 	offset := (req.CurrentPage - 1) * req.PageSize
-	tasks, err := db.GetUserTaskList(payload.UID, req.PageSize, offset)
-	if err != nil {
+	var tasks *[]db.GetTaskInfoModel
+	var err error
+	if req.Status == 4 {
+		tasks, err = db.GetUserTaskList(payload.UID, req.PageSize, offset)
+	} else {
+		fmt.Println(req.Status)
+		tasks, err = db.GetUserTaskListStatus(payload.UID, req.PageSize, offset, req.Status)
+	}
+	if err != nil && err != io.EOF {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"code": 3001,
 			"msg":  "GetUserTaskList failed : " + err.Error(),
 		})
 		return
 	}
-	var tasksResp []TimeTaskResp
+	var tasksResp []TaskListResp
 	for _, task := range *tasks {
 		var strategy TimeStrategy
 		_ = json.Unmarshal([]byte(task.TimingStrategy), &strategy)
-		taskResp := TimeTaskResp{
+		taskResp := TaskListResp{
 			Id:             task.Id,
-			CreatedId:      task.CreatedId,
 			TaskName:       task.TaskName,
-			TimedStart:     task.TimedStart,
-			StartTime:      task.StartTime,
-			TimedEnd:       task.TimedEnd,
-			EndTime:        task.EndTime,
 			TimingStrategy: strategy,
-			TimerType:      task.TimerType,
-			SentContent:    task.SentContent,
-			SendTo:         task.SendTo,
+			TaskExplain:    task.TaskExplain,
 			Status:         task.Status,
+			TimerTypeName:  task.TimerTypeName,
 			CreatedTime:    task.CreatedTime,
 		}
 		tasksResp = append(tasksResp, taskResp)
 	}
+
+	fmt.Printf("%+v\n", tasksResp)
 	c.JSON(http.StatusOK, gin.H{
 		"code": 0,
 		"msg":  "success",
@@ -217,4 +242,59 @@ func GetUserTaskList(c *gin.Context) {
 			"tasks": tasksResp,
 		},
 	})
+}
+
+type GetTaskInfoReq struct {
+	TaskId int `json:"task_id" binding:"required,min=1"`
+}
+
+func GetTaskInfo(c *gin.Context) {
+	var req GetTaskInfoReq
+	if err := c.BindJSON(&req); err != nil {
+		log.Println("bindJson failed", err)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code": 500,
+			"msg":  "req failed " + err.Error(),
+		})
+		return
+	}
+	//payload := c.MustGet(middleware.AuthorizationPayloadKey).(*utils.Claims)
+
+	task, err := db.GetTaskInfoById(req.TaskId)
+	if err != nil && err != io.EOF {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code": 500,
+			"msg":  "db failed" + err.Error(),
+		})
+		return
+	}
+
+	var strategy TimeStrategy
+	_ = json.Unmarshal([]byte(task.TimingStrategy), &strategy)
+	taskResp := TimeTaskInfoResp{
+		Id:             task.Id,
+		CreatedId:      task.CreatedId,
+		TaskName:       task.TaskName,
+		TimedStart:     task.TimedStart,
+		StartTime:      task.StartTime,
+		TimedEnd:       task.TimedEnd,
+		EndTime:        task.EndTime,
+		TimingStrategy: strategy,
+		TimerTypeId:    task.TimerTypeId,
+		TimerTypeName:  task.TimerTypeName,
+		SendType:       task.SendType,
+		TaskExplain:    task.TaskExplain,
+		SentContent:    task.SentContent,
+		SendTo:         task.SendTo,
+		Status:         task.Status,
+		CreatedTime:    task.CreatedTime,
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"code": 0,
+		"msg":  "success",
+		"data": gin.H{
+			"taskInfo": taskResp,
+		},
+	})
+
 }

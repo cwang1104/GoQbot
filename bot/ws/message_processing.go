@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	AtMe         = "[CQ:at,qq=903086461] "
+	cqMe         = "[CQ:at,qq=%s] "
 	AtAll        = "/艾特全体"
 	weatherQuery = "/天气"
 )
@@ -21,6 +21,7 @@ var (
 	MsgChan         = make(chan *SendWsMsgModel, 100)
 	MemberList      = map[int64]*[]bot.MemberInfo{} //加载完成后只读，不涉及写，不用锁
 	supportCity     string
+	AtMe            = fmt.Sprintf(cqMe, utils.GlobalConf.QqBot.QqId)
 )
 
 func init() {

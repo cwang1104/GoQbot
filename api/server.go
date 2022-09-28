@@ -41,7 +41,7 @@ func (s *Server) setRouter() {
 		botGroup.POST("/add_task", http.AddCronJob)
 		botGroup.POST("/stop_task", http.StopTimeTask)
 		botGroup.POST("/get_task_list", http.GetUserTaskList)
-
+		botGroup.POST("/get_task_info", http.GetTaskInfo)
 		//  @全体成员
 		//botGroup.POST("/at_all_member", http.AtAllMember)
 

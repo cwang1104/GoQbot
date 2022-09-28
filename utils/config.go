@@ -19,6 +19,7 @@ type globalConfig struct {
 	}
 
 	Server struct {
+		Ip   string `yaml:"ip"`
 		Port string `yaml:"port"`
 	}
 
@@ -30,6 +31,7 @@ type globalConfig struct {
 	}
 
 	QqBot struct {
+		QqId            string            `yaml:"qqId"`
 		WeatherLocation map[string]string `yaml:"weatherLocation"`
 	}
 }

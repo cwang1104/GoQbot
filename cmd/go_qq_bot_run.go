@@ -18,7 +18,7 @@ func init() {
 
 func main() {
 	server := api.NewServer(utils.GlobalConf.Server.Port)
-	err := server.RunServer("127.0.0.1")
+	err := server.RunServer(utils.GlobalConf.Server.Ip)
 	if err != nil {
 		log.Println("run server failed", err)
 		return

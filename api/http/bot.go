@@ -166,16 +166,16 @@ func StopTimeTask(c *gin.Context) {
 		return
 	}
 
-	taskName := utils.GetTimeTaskName(req.TaskName, req.TaskId)
-	cronJob, exist := croJob.GetTimedTask(taskName)
-	if !exist {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"code": 500,
-			"msg":  "task is not exist" + err.Error(),
-		})
-		return
-	}
-	cronJob.StopCronJob()
+	//taskName := utils.GetTimeTaskName(req.TaskName, req.TaskId)
+	//cronJob, exist := croJob.GetTimedTask(taskName)
+	//if !exist {
+	//	c.JSON(http.StatusInternalServerError, gin.H{
+	//		"code": 500,
+	//		"msg":  "task is not exist timeTask" + err.Error(),
+	//	})
+	//	return
+	//}
+	//cronJob.StopCronJob()
 
 	c.JSON(http.StatusOK, gin.H{
 		"code": 0,

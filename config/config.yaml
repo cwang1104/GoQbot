@@ -1,7 +1,6 @@
 
 mysql:
-#  dbAddress: 127.0.0.1:3306
-  dbAddress: 121.4.255.59:13306
+  dbAddress: 127.0.0.1:3306
   dbUserName: root
   dbPassword: 4524
   dbName: gqbot
@@ -17,13 +16,12 @@ server:
 thirdparty:
   #天气预报调取高德api获取，对应的key
   gaoDe:
-    key: 70952621f87214cfad6c8f62ed61d44e
+    key:
 
 
 qqbot:
-
   #用于机器人的qq号
-  qqId: 903086461
+  qqId:
   #qq机器人支持的天气查询地点 支持地区参考同天气查询api
   weatherLocation:
     #天气查询支持的地区，在此添加，具体的地区代码参照高德地图天气api文档

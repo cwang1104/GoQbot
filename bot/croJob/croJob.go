@@ -25,6 +25,7 @@ type CronJob struct {
 	TimedEnd       int
 	EndTime        int64
 	SentContent    string
+	SendToType     string
 	SendTo         int64
 	TimingStrategy *TimeStrategy
 	TimerTypeId    int
@@ -59,6 +60,7 @@ func NewCronJob(timedTask *db.TimedTaskModel) (*CronJob, error) {
 		TimedEnd:       timedTask.TimedEnd,
 		EndTime:        timedTask.EndTime,
 		SentContent:    timedTask.SentContent,
+		SendToType:     timedTask.SendType,
 		SendTo:         timedTask.SendTo,
 		TimingStrategy: &timeStrategy,
 		TimerTypeId:    timedTask.TimerTypeId,
@@ -77,7 +79,7 @@ func (c *CronJob) StartCronJob() {
 	log.Println("--------cron func", spec)
 
 	err = c.cro.AddFunc(spec, func() {
-		SendMsg("private", c.SendTo, c.SentContent)
+		SendMsg(c.SendToType, c.SendTo, c.SentContent)
 	})
 	if err != nil {
 		log.Println("AddFunc", err)

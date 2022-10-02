@@ -18,7 +18,7 @@ func GetInternalSpec(interval, timeLimitStart, timeLimitEnd int) (string, error)
 
 	//时间间隔为15分钟或30分钟
 	if interval == 15 || interval == 30 || interval == 1 {
-		spec = fmt.Sprintf("* */%d %d-%d * * ?", interval, timeLimitStart, timeLimitEnd)
+		spec = fmt.Sprintf("0 */%d %d-%d * * ?", interval, timeLimitStart, timeLimitEnd)
 
 		//时间间隔为1小时或者2小时
 	} else if interval == 60 || interval == 120 {

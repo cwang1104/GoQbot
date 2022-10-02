@@ -58,7 +58,7 @@ type AddTimedTaskReq struct {
 	SendType    string `json:"send_type"`
 	TaskExplain string `json:"task_explain"`
 	SentContent string `json:"sent_content"`
-	SendTo      int64  `json:"send_to"`
+	SendTo      int64  `json:"send_to" binding:"required,min=1"`
 }
 
 //TimeStrategy 时间策略
@@ -78,7 +78,7 @@ func AddCronJob(c *gin.Context) {
 		})
 		return
 	}
-
+	fmt.Printf("%+v", req)
 	payload := c.MustGet(middleware.AuthorizationPayloadKey).(*utils.Claims)
 
 	timingStrategyJson, err := json.Marshal(req.TimingStrategy)
@@ -155,6 +155,8 @@ func StopTimeTask(c *gin.Context) {
 		return
 	}
 
+	fmt.Println("-----req-------", req)
+
 	payload := c.MustGet(middleware.AuthorizationPayloadKey).(*utils.Claims)
 
 	err := db.UpdateTaskStatusByUser(3, req.TaskId, payload.UID)
@@ -166,16 +168,17 @@ func StopTimeTask(c *gin.Context) {
 		return
 	}
 
-	//taskName := utils.GetTimeTaskName(req.TaskName, req.TaskId)
-	//cronJob, exist := croJob.GetTimedTask(taskName)
-	//if !exist {
-	//	c.JSON(http.StatusInternalServerError, gin.H{
-	//		"code": 500,
-	//		"msg":  "task is not exist timeTask" + err.Error(),
-	//	})
-	//	return
-	//}
-	//cronJob.StopCronJob()
+	taskName := utils.GetTimeTaskName(req.TaskName, req.TaskId)
+	cronJob, exist := croJob.GetTimedTask(taskName)
+
+	if !exist {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code": 500,
+			"msg":  "task is not exist timeTask" + err.Error(),
+		})
+		return
+	}
+	cronJob.StopCronJob()
 
 	c.JSON(http.StatusOK, gin.H{
 		"code": 0,
@@ -199,8 +202,7 @@ func GetUserTaskList(c *gin.Context) {
 		})
 		return
 	}
-	log.Println("---------------")
-	fmt.Printf("%+v\n", req)
+
 	payload := c.MustGet(middleware.AuthorizationPayloadKey).(*utils.Claims)
 	offset := (req.CurrentPage - 1) * req.PageSize
 	var tasks *[]db.GetTaskInfoModel
@@ -234,7 +236,6 @@ func GetUserTaskList(c *gin.Context) {
 		tasksResp = append(tasksResp, taskResp)
 	}
 
-	fmt.Printf("%+v\n", tasksResp)
 	c.JSON(http.StatusOK, gin.H{
 		"code": 0,
 		"msg":  "success",
@@ -296,5 +297,10 @@ func GetTaskInfo(c *gin.Context) {
 			"taskInfo": taskResp,
 		},
 	})
+}
 
+func ShowCronMap(c *gin.Context) {
+	for k, v := range croJob.TimedTaskList {
+		fmt.Printf("key = %v, value = %v\n", k, v)
+	}
 }

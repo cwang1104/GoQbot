@@ -31,6 +31,8 @@ func (s *Server) setRouter() {
 	r.POST("/register", http.UserRegister)
 	r.POST("/login", http.CheckLogin)
 
+	r.GET("/map", http.ShowCronMap)
+
 	//机器人操作
 	botGroup := r.Group("/bot")
 	{

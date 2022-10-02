@@ -31,6 +31,15 @@ func GetUserTaskListStatus(userId, limit, offset, status int) (*[]GetTaskInfoMod
 	return &resp, nil
 }
 
+func GetRunningTask() (*[]TimedTaskModel, error) {
+	var req []TimedTaskModel
+	result := db.Table("timed_task").Where("status = 2").Find(&req)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return &req, nil
+}
+
 func GetAllTaskList() (*[]TimedTaskModel, error) {
 	var tasks []TimedTaskModel
 	result := db.Table("timed_task").Find(&tasks)

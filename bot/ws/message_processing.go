@@ -19,7 +19,7 @@ var (
 	weatherUserList = map[int64]map[int64]int64{} //群号对应下的QQ号列表
 	mux             sync.Mutex
 	MsgChan         = make(chan *SendWsMsgModel, 100)
-	MemberList      = map[int64]*[]bot.MemberInfo{} //加载完成后只读，不涉及写，不用锁
+	MemberList      = map[int64]*[]bot.MemberInfo{} //群成员信息，用于at全体成员，加载完成后只读，不涉及写，不用锁
 	supportCity     string
 	AtMe            = fmt.Sprintf(cqMe, utils.GlobalConf.QqBot.QqId)
 )
@@ -50,7 +50,7 @@ func MessageDistribution(message *MessageType) {
 
 func AtMeFunc(message *MessageType) {
 	msg := "功能菜单：\n 1-查询天气 (输入 /天气)\n 2-艾特全体 (输入 /艾特全体)\n"
-	sendInfo := NewSendGroupMsg(msg, message.GroupId)
+	sendInfo := GetGroupMsgStruct(msg, message.GroupId)
 	MsgChan <- sendInfo
 }
 
@@ -64,7 +64,7 @@ func WeatherQueryFunc(message *MessageType) {
 		if !exist {
 			go func() {
 				AddWeatherUser(message.GroupId, message.UserId)
-				sendMsg := NewSendGroupMsg(supportCity, message.GroupId)
+				sendMsg := GetGroupMsgStruct(supportCity, message.GroupId)
 				MsgChan <- sendMsg
 			}()
 			return
@@ -81,19 +81,19 @@ func WeatherQueryFunc(message *MessageType) {
 				weatherString, err := utils.NewWeatherProvider(cityCode).GetWeatherString()
 				if err != nil {
 					log.Println("get weather info failed" + err.Error())
-					sendMsg := NewSendGroupMsg("获取天气失败", message.GroupId)
+					sendMsg := GetGroupMsgStruct("获取天气失败", message.GroupId)
 					MsgChan <- sendMsg
 					return
 				}
-				sendMsg := NewSendGroupMsg(weatherString, message.GroupId)
+				sendMsg := GetGroupMsgStruct(weatherString, message.GroupId)
 				MsgChan <- sendMsg
 			} else if message.Message == "退出" {
 				fmt.Println("当前输入：", message.Message)
 				DelWeatherUser(message.GroupId, message.UserId)
-				sendMsg := NewSendGroupMsg("好的，退出", message.GroupId)
+				sendMsg := GetGroupMsgStruct("好的，退出", message.GroupId)
 				MsgChan <- sendMsg
 			} else {
-				sendMsg := NewSendGroupMsg(supportCity, message.GroupId)
+				sendMsg := GetGroupMsgStruct(supportCity, message.GroupId)
 				MsgChan <- sendMsg
 			}
 		}
@@ -104,7 +104,7 @@ func WeatherQueryFunc(message *MessageType) {
 func AtAllMember(message *MessageType) {
 
 	if message.Sender.Role == "member" {
-		sendMsg := NewSendGroupMsg("此功能仅群主及管理员可用", message.GroupId)
+		sendMsg := GetGroupMsgStruct("此功能仅群主及管理员可用", message.GroupId)
 		MsgChan <- sendMsg
 		return
 	}
@@ -133,24 +133,9 @@ func AtAllMember(message *MessageType) {
 
 	atAllstring := utils.GetAtAllMemberString(qqList)
 
-	sendMsg := NewSendGroupMsg(atAllstring, message.GroupId)
+	sendMsg := GetGroupMsgStruct(atAllstring, message.GroupId)
 	MsgChan <- sendMsg
 
-}
-
-//NewSendGroupMsg 获取发送qq群消息内容
-func NewSendGroupMsg(message string, groupId int64) *SendWsMsgModel {
-	msg := SendGroupMsg{
-		GroupID:    groupId,
-		Message:    message,
-		AutoEscape: false,
-	}
-
-	wsMsg := SendWsMsgModel{
-		Action: "send_group_msg",
-		Params: msg,
-	}
-	return &wsMsg
 }
 
 func AddWeatherUser(groupId, userId int64) {

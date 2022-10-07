@@ -32,5 +32,4 @@ func main() {
 		return
 	}
 	log.Println("run server success...")
-
 }

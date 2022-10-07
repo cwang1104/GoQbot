@@ -54,6 +54,7 @@ func BotWsHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		//将上报的消息反序列化为结构体
 		var messageMode ws.MessageType
 		_ = json.Unmarshal(data, &messageMode)
 

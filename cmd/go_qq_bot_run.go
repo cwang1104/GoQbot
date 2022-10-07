@@ -21,7 +21,6 @@ func init() {
 		log.Println("bot init failed", err)
 		panic("time task init failed")
 	}
-
 }
 
 func main() {

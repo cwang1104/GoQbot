@@ -8,9 +8,9 @@ import (
 	"log"
 	"net/http"
 	"qbot/api/middleware"
-	"qbot/bot/croJob"
+	"qbot/bot/common/tools"
 	"qbot/db"
-	"qbot/utils"
+	"qbot/pkg/utils"
 	"time"
 )
 
@@ -124,7 +124,7 @@ func AddCronJob(c *gin.Context) {
 		return
 	}
 
-	cronJob, err := croJob.NewCronJob(newTaskInfo)
+	cronJob, err := cronJob.NewCronJob(newTaskInfo)
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"code": 2001,
@@ -168,8 +168,8 @@ func StopTimeTask(c *gin.Context) {
 		return
 	}
 
-	taskName := utils.GetTimeTaskName(req.TaskName, req.TaskId)
-	cronJob, exist := croJob.GetTimedTask(taskName)
+	taskName := tools.GetTimeTaskName(req.TaskName, req.TaskId)
+	cronJob, exist := cronJob.GetTimedTask(taskName)
 
 	if !exist {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -300,7 +300,7 @@ func GetTaskInfo(c *gin.Context) {
 }
 
 func ShowCronMap(c *gin.Context) {
-	for k, v := range croJob.TimedTaskList {
+	for k, v := range cronJob.TimedTaskList {
 		fmt.Printf("key = %v, value = %v\n", k, v)
 	}
 }

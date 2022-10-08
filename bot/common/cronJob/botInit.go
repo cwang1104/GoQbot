@@ -1,4 +1,4 @@
-package croJob
+package cronJob
 
 import (
 	"log"

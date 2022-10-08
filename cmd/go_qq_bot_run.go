@@ -3,9 +3,8 @@ package main
 import (
 	"log"
 	"qbot/api"
-	"qbot/bot/croJob"
 	"qbot/db"
-	"qbot/utils"
+	"qbot/pkg/utils"
 )
 
 func init() {
@@ -16,7 +15,7 @@ func init() {
 	}
 	log.Println("db init success")
 
-	err = croJob.TimeTaskInit()
+	err = cronJob.TimeTaskInit()
 	if err != nil {
 		log.Println("bot init failed", err)
 		panic("time task init failed")

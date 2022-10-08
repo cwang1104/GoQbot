@@ -3,8 +3,9 @@ package weather
 import (
 	"fmt"
 	"log"
+	"qbot/bot/common/tools"
 	"qbot/bot/ws"
-	"qbot/utils"
+	"qbot/pkg/utils"
 )
 
 const weatherQuery = "/天气"
@@ -18,13 +19,12 @@ func WeatherQueryFunc(message *ws.MessageType) {
 		if !exist {
 			go func() {
 				AddWeatherUser(message.GroupId, message.UserId)
-				sendMsg := ws.GetGroupMsgStruct(supportCity, message.GroupId)
+				sendMsg := tools.GetGroupMsgStruct(supportCity, message.GroupId)
 				ws.MsgChan <- sendMsg
 			}()
 			return
 		}
 	}
-
 	//获取当前已经在天气查询中的qq号
 	userList := GetWeatherUserList(message.GroupId)
 	fmt.Println("-----------", userList)
@@ -32,22 +32,22 @@ func WeatherQueryFunc(message *ws.MessageType) {
 		if message.UserId == v {
 			if citySupport(message.Message) {
 				cityCode := utils.GlobalConf.QqBot.WeatherLocation[message.Message]
-				weatherString, err := utils.NewWeatherProvider(cityCode).GetWeatherString()
+				weatherString, err := tools.NewWeatherProvider(cityCode).GetWeatherString()
 				if err != nil {
 					log.Println("get weather info failed" + err.Error())
-					sendMsg := ws.GetGroupMsgStruct("获取天气失败", message.GroupId)
+					sendMsg := tools.GetGroupMsgStruct("获取天气失败", message.GroupId)
 					ws.MsgChan <- sendMsg
 					return
 				}
-				sendMsg := ws.GetGroupMsgStruct(weatherString, message.GroupId)
+				sendMsg := tools.GetGroupMsgStruct(weatherString, message.GroupId)
 				ws.MsgChan <- sendMsg
 			} else if message.Message == "退出" {
 				fmt.Println("当前输入：", message.Message)
 				DelWeatherUser(message.GroupId, message.UserId)
-				sendMsg := ws.GetGroupMsgStruct("好的，退出", message.GroupId)
+				sendMsg := tools.GetGroupMsgStruct("好的，退出", message.GroupId)
 				ws.MsgChan <- sendMsg
 			} else {
-				sendMsg := ws.GetGroupMsgStruct(supportCity, message.GroupId)
+				sendMsg := tools.GetGroupMsgStruct(supportCity, message.GroupId)
 				ws.MsgChan <- sendMsg
 			}
 		}

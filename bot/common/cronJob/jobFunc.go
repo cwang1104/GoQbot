@@ -1,12 +1,12 @@
-package croJob
+package cronJob
 
 import (
 	"log"
-	"qbot/bot/http"
+	"qbot/bot/common/tools"
 )
 
 func SendMsg(msgType string, sengToId int64, message string) error {
-	msgSender := http.NewMessageSender(msgType, sengToId, message)
+	msgSender := tools.NewMessageSender(msgType, sengToId, message)
 	err := msgSender.SendMsg()
 	if err != nil {
 		log.Println("send msg failed", err)

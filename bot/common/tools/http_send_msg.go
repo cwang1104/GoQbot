@@ -1,4 +1,4 @@
-package http
+package tools
 
 import (
 	"encoding/json"
@@ -34,8 +34,8 @@ func (m *MessageSender) SendMsg() error {
 		log.Println("json marshal failed", err)
 		return err
 	}
-	url := fmt.Sprintf("%s/send_msg", baseUrl)
-	content, err := httpPost(url, b)
+	url := fmt.Sprintf("%s/send_msg", CqHttpBaseUrl)
+	content, err := HttpPost(url, b)
 	if err != nil {
 		log.Println("http post failed", err)
 		return err

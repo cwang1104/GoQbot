@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"qbot/utils"
+	"qbot/pkg/utils"
 	"strings"
 )
 

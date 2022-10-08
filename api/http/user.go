@@ -5,7 +5,7 @@ import (
 	"log"
 	"net/http"
 	"qbot/db"
-	"qbot/utils"
+	utils2 "qbot/pkg/utils"
 	"time"
 )
 
@@ -25,7 +25,7 @@ func UserRegister(c *gin.Context) {
 		return
 	}
 
-	hashPassword, err := utils.HashPassword(req.Password)
+	hashPassword, err := utils2.HashPassword(req.Password)
 	if err != nil {
 		log.Println("HashPassword failed", err.Error())
 		c.JSON(http.StatusUnauthorized, gin.H{
@@ -76,7 +76,7 @@ func CheckLogin(c *gin.Context) {
 		return
 	}
 
-	err = utils.CheckPassword(req.Password, userInfo.Password)
+	err = utils2.CheckPassword(req.Password, userInfo.Password)
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"code": 2002,
@@ -85,7 +85,7 @@ func CheckLogin(c *gin.Context) {
 		return
 	}
 
-	token, err := utils.NewJWT().CreateToken(userInfo.Id, userInfo.UserName)
+	token, err := utils2.NewJWT().CreateToken(userInfo.Id, userInfo.UserName)
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"code": 2002,

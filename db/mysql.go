@@ -6,7 +6,7 @@ import (
 	"gorm.io/gorm"
 	"gorm.io/gorm/schema"
 	"log"
-	"qbot/utils"
+	"qbot/pkg/utils"
 	"time"
 )
 

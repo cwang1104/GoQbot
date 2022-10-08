@@ -1,13 +1,11 @@
-package utils
+package tools
 
 import (
 	"encoding/json"
 	"errors"
 	"fmt"
-
-	"io/ioutil"
 	"log"
-	"net/http"
+	"qbot/pkg/utils"
 )
 
 type WeatherProvider struct {
@@ -49,8 +47,8 @@ func NewWeatherProvider(cityCode string) *WeatherProvider {
 }
 
 func (w *WeatherProvider) GetWeatherObj() (*Weather, error) {
-	url := fmt.Sprintf("https://restapi.amap.com/v3/weather/weatherInfo?city=%s&extensions=all&key=%s", w.LocationCode, GlobalConf.ThirdParty.GaoDe.Key)
-	content, err := httpGet(url)
+	url := fmt.Sprintf("https://restapi.amap.com/v3/weather/weatherInfo?city=%s&extensions=all&key=%s", w.LocationCode, utils.GlobalConf.ThirdParty.GaoDe.Key)
+	content, err := HttpGet(url)
 	if err != nil {
 		log.Println("http get failed", err)
 		return nil, err
@@ -97,21 +95,4 @@ func (w *WeatherProvider) GetWeatherString() (string, error) {
 
 	return weatherString, nil
 
-}
-
-func httpGet(url string) ([]byte, error) {
-
-	resp, err := http.Get(url)
-	if err != nil {
-		log.Println("get failed:", err)
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	content, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		log.Println("Read failed:", err)
-		return nil, err
-	}
-	return content, nil
 }

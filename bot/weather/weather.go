@@ -1,8 +1,7 @@
 package weather
 
 import (
-	"fmt"
-	"qbot/utils"
+	"qbot/pkg/utils"
 	"sync"
 )
 
@@ -25,21 +24,16 @@ func init() {
 
 func AddWeatherUser(groupId, userId int64) {
 	mux.Lock()
-	fmt.Println("--1", weatherUserList)
 	defer mux.Unlock()
 	_, exist := weatherUserList[groupId]
-	fmt.Println("--2", weatherUserList)
+
 	if !exist {
-		fmt.Println("--3", weatherUserList)
 		userIdMap := make(map[int64]int64)
 		userIdMap[userId] = userId
 		weatherUserList[groupId] = userIdMap
-		fmt.Println("--4", weatherUserList)
 		return
 	}
-	fmt.Println("--5")
 	weatherUserList[groupId][userId] = userId
-	fmt.Println("--6")
 }
 
 func GetWeatherUserList(groupId int64) []int64 {

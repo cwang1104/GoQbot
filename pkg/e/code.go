@@ -1,0 +1,30 @@
+package e
+
+const (
+	SUCCESS = 0
+	ERROR   = 500
+
+	//api接口校验
+	INVALID_PARAMS = 10001
+
+	//校验出错
+
+	ERROR_AUTH_CHECK_TOKEN_FAIL    = 20001
+	ERROR_AUTH_CHECK_TOKEN_TIMEOUT = 20002
+	ERROR_GENERATE_TOKEN           = 20003
+	ERROR_AUTH                     = 20004
+	ERROR_EXIST_NICK               = 20005
+	ERROR_EXIST_USER               = 20006
+	ERROR_NOT_EXIST_USER           = 20007
+	ERROR_CHECK_PASSWORD_FAIL      = 20008
+	ERROR_FAIL_ENCRYPTION          = 20009
+
+	//机器人相关错误
+	ERROR_CALL_API = 30001
+
+	//第三方组件错误
+	ERROR_DATABASE = 40001
+
+	//其他错误
+	ERROR_UNMARSHAL_JSON = 50001
+)

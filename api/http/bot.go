@@ -8,8 +8,10 @@ import (
 	"log"
 	"net/http"
 	"qbot/api/middleware"
+	"qbot/bot/common/cronJob"
 	"qbot/bot/common/tools"
 	"qbot/db"
+	"qbot/pkg/e"
 	"qbot/pkg/utils"
 	"time"
 )
@@ -72,10 +74,7 @@ func AddCronJob(c *gin.Context) {
 	var req AddTimedTaskReq
 	if err := c.BindJSON(&req); err != nil {
 		log.Println("bindJson failed", err)
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"code": 500,
-			"msg":  "req failed " + err.Error(),
-		})
+		c.JSON(http.StatusInternalServerError, e.ErrorResponse(e.INVALID_PARAMS, err))
 		return
 	}
 	fmt.Printf("%+v", req)
@@ -83,10 +82,7 @@ func AddCronJob(c *gin.Context) {
 
 	timingStrategyJson, err := json.Marshal(req.TimingStrategy)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"code": 2001,
-			"msg":  "TimingStrategy json failed:" + err.Error(),
-		})
+		c.JSON(http.StatusInternalServerError, e.ErrorResponse(e.ERROR_UNMARSHAL_JSON, err))
 	}
 
 	taskInfo := db.TimedTaskModel{
@@ -108,31 +104,22 @@ func AddCronJob(c *gin.Context) {
 
 	err = db.AddTimedTask(&taskInfo)
 	if err != nil {
-		c.JSON(http.StatusOK, gin.H{
-			"code": 2001,
-			"msg":  "db add time task failed" + err.Error(),
-		})
+		c.JSON(http.StatusOK, e.ErrorResponse(e.ERROR_DATABASE, err))
 		return
 	}
 
 	newTaskInfo, err := db.GetTaskInfoByNameAndUserId(taskInfo.TaskName, taskInfo.CreatedId)
 	if err != nil {
-		c.JSON(http.StatusOK, gin.H{
-			"code": 2001,
-			"msg":  "db get time task failed" + err.Error(),
-		})
+		c.JSON(http.StatusOK, e.ErrorResponse(e.ERROR_DATABASE, err))
 		return
 	}
 
-	cronJob, err := cronJob.NewCronJob(newTaskInfo)
+	timeJob, err := cronJob.NewCronJob(newTaskInfo)
 	if err != nil {
-		c.JSON(http.StatusOK, gin.H{
-			"code": 2001,
-			"msg":  "NewCronJob failed" + err.Error(),
-		})
+		c.JSON(http.StatusOK, e.ErrorResponse(e.ERROR_CREATE_CRONJOB_FAIL, err))
 		return
 	}
-	cronJob.StartCronJob()
+	timeJob.StartCronJob()
 	c.JSON(http.StatusOK, gin.H{
 		"code": 0,
 		"msg":  "success",

@@ -1,5 +1,7 @@
 package e
 
+import "github.com/gin-gonic/gin"
+
 var MsgFlags = map[int]string{
 	SUCCESS: "ok",
 	ERROR:   "fail",
@@ -19,6 +21,7 @@ var MsgFlags = map[int]string{
 	//
 	ERROR_CALL_API: "调取机器人api接口失败",
 
+	ERROR_CREATE_CRONJOB_FAIL: "新建定时任务失败",
 	//
 	ERROR_DATABASE: "数据库操作错误",
 
@@ -33,4 +36,11 @@ func GetMsg(code int) string {
 		return msg
 	}
 	return MsgFlags[ERROR]
+}
+
+func ErrorResponse(code int, err error) gin.H {
+	return gin.H{
+		"code": code,
+		"msg":  GetMsg(code) + err.Error(),
+	}
 }

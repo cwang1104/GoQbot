@@ -22,6 +22,8 @@ const (
 	//机器人相关错误
 	ERROR_CALL_API = 30001
 
+	ERROR_CREATE_CRONJOB_FAIL = 30010
+
 	//第三方组件错误
 	ERROR_DATABASE = 40001
 

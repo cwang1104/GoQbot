@@ -1,5 +1,7 @@
 package tools
 
+var MsgChan = make(chan *SendWsMsgModel, 100)
+
 //SendWsMsgModel 发送消息 消息体结构
 type SendWsMsgModel struct {
 	Action string      `json:"action"`

@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"qbot/bot/common/tools"
-	"qbot/bot/ws"
 	"qbot/pkg/utils"
 )
 
@@ -12,7 +11,7 @@ const weatherQuery = "/天气"
 
 //WeatherQueryFunc 天气查询功能实现函数
 //传入参数为 MessageType指针
-func WeatherQueryFunc(message *ws.MessageType) {
+func WeatherQueryFunc(message *tools.MessageType) {
 	if message.Message == weatherQuery {
 		//是否当前已经在天气查询中
 		_, exist := GetWeatherUser(message.GroupId, message.UserId)
@@ -20,7 +19,7 @@ func WeatherQueryFunc(message *ws.MessageType) {
 			go func() {
 				AddWeatherUser(message.GroupId, message.UserId)
 				sendMsg := tools.GetGroupMsgStruct(supportCity, message.GroupId)
-				ws.MsgChan <- sendMsg
+				tools.MsgChan <- sendMsg
 			}()
 			return
 		}
@@ -36,19 +35,19 @@ func WeatherQueryFunc(message *ws.MessageType) {
 				if err != nil {
 					log.Println("get weather info failed" + err.Error())
 					sendMsg := tools.GetGroupMsgStruct("获取天气失败", message.GroupId)
-					ws.MsgChan <- sendMsg
+					tools.MsgChan <- sendMsg
 					return
 				}
 				sendMsg := tools.GetGroupMsgStruct(weatherString, message.GroupId)
-				ws.MsgChan <- sendMsg
+				tools.MsgChan <- sendMsg
 			} else if message.Message == "退出" {
 				fmt.Println("当前输入：", message.Message)
 				DelWeatherUser(message.GroupId, message.UserId)
 				sendMsg := tools.GetGroupMsgStruct("好的，退出", message.GroupId)
-				ws.MsgChan <- sendMsg
+				tools.MsgChan <- sendMsg
 			} else {
 				sendMsg := tools.GetGroupMsgStruct(supportCity, message.GroupId)
-				ws.MsgChan <- sendMsg
+				tools.MsgChan <- sendMsg
 			}
 		}
 	}

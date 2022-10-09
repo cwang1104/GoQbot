@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"qbot/api/http"
-	"qbot/api/middleware"
 	"qbot/api/socket"
+	"qbot/middleware"
 )
 
 type Server struct {

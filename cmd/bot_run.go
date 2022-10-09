@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"qbot/api"
+	"qbot/bot/common/cronJob"
 	"qbot/db"
 	"qbot/pkg/utils"
 )

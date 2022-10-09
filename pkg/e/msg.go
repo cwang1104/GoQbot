@@ -22,8 +22,13 @@ var MsgFlags = map[int]string{
 	ERROR_CALL_API: "调取机器人api接口失败",
 
 	ERROR_CREATE_CRONJOB_FAIL: "新建定时任务失败",
+	ERROR_CROBJOB_NOT_EXIST:   "定时任务不存在",
 	//
-	ERROR_DATABASE: "数据库操作错误",
+	ERROR_DATABASE:             "数据库操作错误",
+	ERROR_DATABASE_QUERY_FAIL:  "数据库查询操作错误",
+	ERROR_DATABASE_UPDATE_FAIL: "数据库更新操作错误",
+	ERROR_DATABASE_DELETE_FAIL: "数据库删除操作作物",
+	ERROR_DATABASE_CREATE_FAIL: "数据库增加操作错误",
 
 	//
 	ERROR_UNMARSHAL_JSON: "解码JSON失败",
@@ -42,5 +47,20 @@ func ErrorResponse(code int, err error) gin.H {
 	return gin.H{
 		"code": code,
 		"msg":  GetMsg(code) + err.Error(),
+	}
+}
+
+func SuccessResponseWithData(data interface{}) gin.H {
+	return gin.H{
+		"code": 0,
+		"msg":  "ok",
+		"data": data,
+	}
+}
+
+func SuccessResponse() gin.H {
+	return gin.H{
+		"code": 0,
+		"msg":  "ok",
 	}
 }

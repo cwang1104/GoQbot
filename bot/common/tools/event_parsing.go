@@ -1,5 +1,10 @@
-package ws
+package tools
 
+import (
+	"encoding/json"
+)
+
+//MessageType 上报消息体结构
 type MessageType struct {
 	PostType    string `json:"post_type"`    // 上报类型：message request notice meta_event
 	MessageType string `json:"message_type"` //消息类型：
@@ -17,6 +22,7 @@ type MessageType struct {
 	GroupId    int64       `json:"group_id"`
 }
 
+//SenderModel 上报消息发送者 消息体结构
 type SenderModel struct {
 	Age      int64  `json:"age"`
 	Area     string `json:"area"`
@@ -27,4 +33,15 @@ type SenderModel struct {
 	Title    string `json:"title"`
 	Sex      string `json:"sex"`
 	UserId   int64  `json:"user_id"`
+}
+
+//将上报的消息反序列化为结构体
+
+func ParsingMessage(data []byte) (*MessageType, error) {
+	var messageMode MessageType
+	err := json.Unmarshal(data, &messageMode)
+	if err != nil {
+		return nil, err
+	}
+	return &messageMode, nil
 }

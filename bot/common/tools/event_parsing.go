@@ -7,6 +7,7 @@ import (
 //MessageType 上报消息体结构
 type MessageType struct {
 	PostType    string `json:"post_type"`    // 上报类型：message request notice meta_event
+	NoticeType  string `json:"notice_type"`  //notice 类型的通知类型
 	MessageType string `json:"message_type"` //消息类型：
 	Time        int64  `json:"time"`
 	SelfId      int64  `json:"self_id"`  //机器人qq号
@@ -17,6 +18,7 @@ type MessageType struct {
 	MessageId  int64       `json:"message_id"`
 	UserId     int64       `json:"user_id"`
 	TargetId   int64       `json:"target_id"`
+	OperatorId int64       `json:"operator_id"` //操作者id
 	Message    string      `json:"message"`
 	RawMessage string      `json:"raw_message"`
 	GroupId    int64       `json:"group_id"`

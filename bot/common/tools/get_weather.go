@@ -6,10 +6,19 @@ import (
 	"fmt"
 	"log"
 	"qbot/pkg/utils"
+	"strings"
+	"sync"
+	"time"
+)
+
+var (
+	weatherCache = map[string]*Weather{}
+	mu           sync.Mutex
 )
 
 type WeatherProvider struct {
 	LocationCode string
+	WeatherKey   string
 }
 
 type Weather struct {
@@ -43,10 +52,18 @@ type Cast struct {
 func NewWeatherProvider(cityCode string) *WeatherProvider {
 	return &WeatherProvider{
 		LocationCode: cityCode,
+		WeatherKey:   GetWeatherKey(cityCode),
 	}
 }
 
 func (w *WeatherProvider) GetWeatherObj() (*Weather, error) {
+
+	//如果当天当城市的天气已经被缓存 则直接返回
+	if _, exist := GetWeatherCache(w.WeatherKey); exist {
+		weather, _ := GetWeatherCache(w.WeatherKey)
+		return weather, nil
+	}
+	//从api接口请求
 	url := fmt.Sprintf("https://restapi.amap.com/v3/weather/weatherInfo?city=%s&extensions=all&key=%s", w.LocationCode, utils.GlobalConf.ThirdParty.GaoDe.Key)
 	content, err := HttpGet(url)
 	if err != nil {
@@ -60,8 +77,12 @@ func (w *WeatherProvider) GetWeatherObj() (*Weather, error) {
 		log.Println("Unmarshal weather info failed", err)
 		return nil, err
 	}
-	fmt.Printf("%+v\n", weather)
+
 	if weather.InfoCode == "10000" {
+		//将今天的天气信息存入map中
+		AddWeatherCache(w.WeatherKey, &weather)
+		//将昨天的删除
+		DeleteExpireWeather()
 		return &weather, nil
 	} else {
 		return nil, errors.New("get weather failed" + weather.Info)
@@ -75,7 +96,6 @@ func (w *WeatherProvider) GetWeatherString() (string, error) {
 		log.Println("get weather failed", err)
 		return "", err
 	}
-
 	weatherStringTemplate := "%s天气预报：\n" +
 		"今日（%s）：\n" +
 		"白天天气：%s\n" +
@@ -94,5 +114,39 @@ func (w *WeatherProvider) GetWeatherString() (string, error) {
 		weather.ForeCasts[0].Casts[1].NightWeather, weather.ForeCasts[0].Casts[1].NightTemp)
 
 	return weatherString, nil
+}
 
+func AddWeatherCache(key string, weather *Weather) {
+	mu.Lock()
+	defer mu.Unlock()
+	weatherCache[key] = weather
+}
+
+func GetWeatherCache(key string) (weather *Weather, exist bool) {
+	mu.Lock()
+	defer mu.Unlock()
+	weather, exist = weatherCache[key]
+	return
+}
+
+func DelWeatherCache(key string) {
+	mu.Lock()
+	defer mu.Unlock()
+	delete(weatherCache, key)
+}
+
+//GetWeatherKey 根据当天时间和城市代码生成map-key
+func GetWeatherKey(cityCode string) string {
+	timeString := time.Now().Format("2006-01-02")
+	return fmt.Sprintf("%s*%s", cityCode, timeString)
+}
+
+func DeleteExpireWeather() {
+	for k, _ := range weatherCache {
+		parts := strings.Split(k, "*")[1]
+		exDate := time.Unix(time.Now().Unix()-60*60*24, 0).Format("2006-01-02")
+		if parts == exDate {
+			DelWeatherCache(k)
+		}
+	}
 }

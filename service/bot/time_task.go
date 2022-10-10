@@ -6,7 +6,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"io"
 	"qbot/bot/common/cronJob"
-	"qbot/bot/common/tools"
 	"qbot/db"
 	"qbot/middleware"
 	"qbot/pkg/e"
@@ -136,7 +135,7 @@ func (t *TimedTaskService) StopTimeTask(ctx *gin.Context) (res gin.H) {
 		return
 	}
 
-	taskName := tools.GetTimeTaskName(t.TaskName, t.Id)
+	taskName := cronJob.GetTimeTaskName(t.TaskName, t.Id)
 	timeTask, exist := cronJob.GetTimedTask(taskName)
 
 	if !exist {

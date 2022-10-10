@@ -12,6 +12,11 @@ import (
 const (
 	cqMe  = "[CQ:at,qq=%s] "
 	AtAll = "/艾特全体"
+
+	PostMessage   = "message"
+	PostRequest   = "request"
+	PostNotice    = "notice"
+	PostMetaEvent = "meta_event"
 )
 
 var (
@@ -24,6 +29,17 @@ func MessageDistribution(messageBytes []byte) {
 	if err != nil {
 		log.Println("parse message failed,message = ", string(messageBytes))
 		return
+	}
+
+	switch message.PostType {
+	case PostMessage:
+		fmt.Println("message")
+	case PostRequest:
+		fmt.Println("request")
+	case PostNotice:
+		fmt.Println("notice")
+	case PostMetaEvent:
+		fmt.Println("meta_event")
 	}
 
 	//处理消息事件

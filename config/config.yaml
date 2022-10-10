@@ -9,12 +9,13 @@ mysql:
   dbMaxLifeTime: 120
 
 server:
+  #对外访问ip及端口
   ip: 0.0.0.0
   port: 56001
 
 #第三方平台的密钥
 thirdparty:
-  #天气预报调取高德api获取，对应的key
+  #天气预报调取高德web服务api获取，需要开发者账号对应的key
   gaoDe:
     key:
 

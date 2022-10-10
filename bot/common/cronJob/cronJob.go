@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"github.com/robfig/cron"
 	"log"
-	"qbot/bot/common/tools"
 	"qbot/db"
 	"sync"
 	"time"
@@ -71,7 +70,7 @@ func NewCronJob(timedTask *db.TimedTaskModel) (*CronJob, error) {
 //StartCronJob 开启定时器
 func (c *CronJob) StartCronJob() {
 
-	spec, err := tools.GetInternalSpec(c.TimingStrategy.Interval, c.TimingStrategy.TimeLimitStart, c.TimingStrategy.TimeLimitEnd)
+	spec, err := GetInternalSpec(c.TimingStrategy.Interval, c.TimingStrategy.TimeLimitStart, c.TimingStrategy.TimeLimitEnd)
 	if err != nil {
 		log.Println("GetInternalSpec failed", err)
 		return
@@ -86,7 +85,7 @@ func (c *CronJob) StartCronJob() {
 		return
 	}
 	//添加进TimeTaskList
-	taskName := tools.GetTimeTaskName(c.TaskName, c.TaskId)
+	taskName := GetTimeTaskName(c.TaskName, c.TaskId)
 	AddTimedTask(c)
 
 	//检验是否 定时启动和定时关闭
@@ -137,7 +136,7 @@ func (c *CronJob) StartCronJob() {
 }
 
 func (c *CronJob) StopCronJob() {
-	taskName := tools.GetTimeTaskName(c.TaskName, c.TaskId)
+	taskName := GetTimeTaskName(c.TaskName, c.TaskId)
 	DelTimedTask(taskName)
 	c.cro.Stop()
 	err := db.UpdateTaskStatus(3, c.TaskId)
@@ -150,7 +149,7 @@ func (c *CronJob) StopCronJob() {
 // AddTimedTask 添加定时任务到map
 func AddTimedTask(cronJob *CronJob) {
 	TimeLock.Lock()
-	taskName := tools.GetTimeTaskName(cronJob.TaskName, cronJob.TaskId)
+	taskName := GetTimeTaskName(cronJob.TaskName, cronJob.TaskId)
 	TimedTaskList[taskName] = cronJob
 	TimeLock.Unlock()
 	return

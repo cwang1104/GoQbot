@@ -2,11 +2,11 @@ package bot
 
 import (
 	"fmt"
-	"log"
 	"qbot/bot/at_member"
 	"qbot/bot/common/tools"
 	"qbot/bot/member_change_notice"
 	"qbot/bot/weather"
+	"qbot/pkg/logger"
 	"qbot/pkg/utils"
 )
 
@@ -28,7 +28,7 @@ func MessageDistribution(messageBytes []byte) {
 
 	message, err := tools.ParsingMessage(messageBytes)
 	if err != nil {
-		log.Println("parse message failed,message = ", string(messageBytes))
+		logger.Log.Errorf("parse message failed,message = %s, err=%v", string(messageBytes), err)
 		return
 	}
 
@@ -50,7 +50,6 @@ func MessageDistribution(messageBytes []byte) {
 
 	//处理请求事件
 	case PostRequest:
-		fmt.Println("request")
 
 	//处理通知事件
 	case PostNotice:
@@ -59,7 +58,7 @@ func MessageDistribution(messageBytes []byte) {
 
 	//处理元事件
 	case PostMetaEvent:
-		fmt.Println("meta_event")
+
 	}
 
 }

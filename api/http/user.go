@@ -2,16 +2,16 @@ package http
 
 import (
 	"github.com/gin-gonic/gin"
-	"log"
 	"net/http"
 	"qbot/pkg/e"
+	"qbot/pkg/logger"
 	user2 "qbot/service/user"
 )
 
 func UserRegister(c *gin.Context) {
 	var req user2.RegisterService
 	if err := c.BindJSON(&req); err != nil {
-		log.Println("bindJson failed", err)
+		logger.Log.Errorf("[params bindJson failed] [err:%v]", err)
 		c.JSON(http.StatusBadRequest, e.ErrorResponse(e.INVALID_PARAMS, err))
 		return
 	}
@@ -22,7 +22,7 @@ func UserRegister(c *gin.Context) {
 func CheckLogin(c *gin.Context) {
 	var req user2.RegisterService
 	if err := c.BindJSON(&req); err != nil {
-		log.Println("bindJson failed", err)
+		logger.Log.Errorf("[params bindJson failed] [err:%v]", err)
 		c.JSON(http.StatusBadRequest, e.ErrorResponse(e.INVALID_PARAMS, err))
 		return
 	}

@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
+	"qbot/pkg/logger"
 	"qbot/pkg/utils"
 	"strings"
 	"sync"
@@ -61,20 +61,21 @@ func (w *WeatherProvider) GetWeatherObj() (*Weather, error) {
 	//如果当天当城市的天气已经被缓存 则直接返回
 	if _, exist := GetWeatherCache(w.WeatherKey); exist {
 		weather, _ := GetWeatherCache(w.WeatherKey)
+		logger.Log.Infof("[%s天气查询成功]", weather.ForeCasts[0].City)
 		return weather, nil
 	}
 	//从api接口请求
 	url := fmt.Sprintf("https://restapi.amap.com/v3/weather/weatherInfo?city=%s&extensions=all&key=%s", w.LocationCode, utils.GlobalConf.ThirdParty.GaoDe.Key)
 	content, err := HttpGet(url)
 	if err != nil {
-		log.Println("http get failed", err)
+		logger.Log.Errorf("[http get failed][err:%v]", err)
 		return nil, err
 	}
 
 	var weather Weather
 	err = json.Unmarshal(content, &weather)
 	if err != nil {
-		log.Println("Unmarshal weather info failed", err)
+		logger.Log.Errorf("[Unmarshal weather info failed][err:%v]", err)
 		return nil, err
 	}
 
@@ -83,6 +84,7 @@ func (w *WeatherProvider) GetWeatherObj() (*Weather, error) {
 		AddWeatherCache(w.WeatherKey, &weather)
 		//将昨天的删除
 		DeleteExpireWeather()
+		logger.Log.Infof("[%s天气查询成功]", weather.ForeCasts[0].City)
 		return &weather, nil
 	} else {
 		return nil, errors.New("get weather failed" + weather.Info)
@@ -93,7 +95,7 @@ func (w *WeatherProvider) GetWeatherObj() (*Weather, error) {
 func (w *WeatherProvider) GetWeatherString() (string, error) {
 	weather, err := w.GetWeatherObj()
 	if err != nil {
-		log.Println("get weather failed", err)
+		logger.Log.Errorf("[get weather failed][err:%v]", err)
 		return "", err
 	}
 	weatherStringTemplate := "%s天气预报：\n" +

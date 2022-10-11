@@ -2,9 +2,9 @@ package user
 
 import (
 	"github.com/gin-gonic/gin"
-	"log"
 	"qbot/db"
 	"qbot/pkg/e"
+	"qbot/pkg/logger"
 	utils2 "qbot/pkg/utils"
 	"time"
 )
@@ -18,7 +18,7 @@ type RegisterService struct {
 func (r *RegisterService) AccountRegister() gin.H {
 	hashPassword, err := utils2.HashPassword(r.Password)
 	if err != nil {
-		log.Println("HashPassword failed", err.Error())
+		logger.Log.Errorf("%s", e.GetMsg(e.ERROR_FAIL_ENCRYPTION))
 		res := e.ErrorResponse(e.ERROR_FAIL_ENCRYPTION, err)
 		return res
 	}
@@ -31,8 +31,8 @@ func (r *RegisterService) AccountRegister() gin.H {
 
 	err = db.AddUser(&user)
 	if err != nil {
-		log.Println("db add user failed", err)
-		res := e.ErrorResponse(e.ERROR_DATABASE, err)
+		logger.Log.Errorf("%s", e.GetMsg(e.ERROR_DATABASE_CREATE_FAIL))
+		res := e.ErrorResponse(e.ERROR_DATABASE_CREATE_FAIL, err)
 		return res
 	}
 	return e.SuccessResponse()
@@ -44,7 +44,8 @@ func (r *RegisterService) CheckLogin() (res gin.H) {
 	//数据库中查询密码
 	userInfo, err := db.GetUserInfoByName(r.UserName)
 	if err != nil {
-		res = e.ErrorResponse(e.ERROR_DATABASE, err)
+		logger.Log.Errorf("%s", e.GetMsg(e.ERROR_DATABASE_QUERY_FAIL))
+		res = e.ErrorResponse(e.ERROR_DATABASE_QUERY_FAIL, err)
 		return
 	}
 
@@ -52,6 +53,7 @@ func (r *RegisterService) CheckLogin() (res gin.H) {
 	err = utils2.CheckPassword(r.Password, userInfo.Password)
 	if err != nil {
 		res = e.ErrorResponse(e.ERROR_CHECK_PASSWORD_FAIL, err)
+		logger.Log.Errorf("%s", e.GetMsg(e.ERROR_CHECK_PASSWORD_FAIL))
 		return
 	}
 
@@ -60,6 +62,7 @@ func (r *RegisterService) CheckLogin() (res gin.H) {
 	token, err := utils2.NewJWT().CreateToken(userInfo.Id, userInfo.UserName)
 	if err != nil {
 		res = e.ErrorResponse(e.ERROR_GENERATE_TOKEN, err)
+		logger.Log.Errorf("%s", e.GetMsg(e.ERROR_GENERATE_TOKEN))
 		return
 	}
 

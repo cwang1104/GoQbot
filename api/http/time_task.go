@@ -3,10 +3,10 @@ package http
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"log"
 	"net/http"
 	"qbot/bot/common/cronJob"
 	"qbot/pkg/e"
+	"qbot/pkg/logger"
 	"qbot/service/bot"
 )
 
@@ -14,7 +14,7 @@ import (
 func AddCronJob(c *gin.Context) {
 	var req bot.TimedTaskService
 	if err := c.BindJSON(&req); err != nil {
-		log.Println("bindJson failed", err)
+		logger.Log.Errorf("[params bindJson failed] [err:%v]", err)
 		c.JSON(http.StatusInternalServerError, e.ErrorResponse(e.INVALID_PARAMS, err))
 		return
 	}
@@ -33,7 +33,7 @@ func AddCronJob(c *gin.Context) {
 func StopTimeTask(c *gin.Context) {
 	var req bot.TimedTaskService
 	if err := c.BindJSON(&req); err != nil {
-		log.Println("bindJson failed", err)
+		logger.Log.Errorf("[params bindJson failed] [err:%v]", err)
 		c.JSON(http.StatusInternalServerError, e.ErrorResponse(e.INVALID_PARAMS, err))
 		return
 	}
@@ -46,7 +46,7 @@ func StopTimeTask(c *gin.Context) {
 func GetUserTaskList(c *gin.Context) {
 	var req bot.TimedTaskService
 	if err := c.BindJSON(&req); err != nil {
-		log.Println("bindJson failed", err)
+		logger.Log.Errorf("[params bindJson failed] [err:%v]", err)
 		c.JSON(http.StatusInternalServerError, e.ErrorResponse(e.INVALID_PARAMS, err))
 		return
 	}
@@ -66,7 +66,7 @@ func GetUserTaskList(c *gin.Context) {
 func GetTaskInfo(c *gin.Context) {
 	var req bot.TimedTaskService
 	if err := c.BindJSON(&req); err != nil {
-		log.Println("bindJson failed", err)
+		logger.Log.Errorf("[params bindJson failed] [err:%v]", err)
 		c.JSON(http.StatusInternalServerError, e.ErrorResponse(e.INVALID_PARAMS, err))
 		return
 	}

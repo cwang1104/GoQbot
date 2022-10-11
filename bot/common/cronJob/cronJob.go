@@ -3,8 +3,8 @@ package cronJob
 import (
 	"encoding/json"
 	"github.com/robfig/cron"
-	"log"
 	"qbot/db"
+	"qbot/pkg/logger"
 	"sync"
 	"time"
 )
@@ -44,8 +44,8 @@ func NewCronJob(timedTask *db.TimedTaskModel) (*CronJob, error) {
 	var timeStrategy TimeStrategy
 	err := json.Unmarshal([]byte(timedTask.TimingStrategy), &timeStrategy)
 	if err != nil {
-		log.Println("TimingStrategy json string", timedTask.TimingStrategy)
-		log.Println("unmarshal json string failed", err)
+		logger.Log.Errorf("[unmarshal json string failed][err:%v][TimingStrategy json string:%s]",
+			err, timedTask.TimingStrategy)
 		return nil, err
 	}
 
@@ -72,16 +72,17 @@ func (c *CronJob) StartCronJob() {
 
 	spec, err := GetInternalSpec(c.TimingStrategy.Interval, c.TimingStrategy.TimeLimitStart, c.TimingStrategy.TimeLimitEnd)
 	if err != nil {
-		log.Println("GetInternalSpec failed", err)
+		logger.Log.Errorf("[GetInternalSpec failed][err:%v]", err)
 		return
 	}
-	log.Println("--------cron func", spec)
+
+	logger.Log.Infof("[cron func string:%s]", spec)
 
 	err = c.cro.AddFunc(spec, func() {
 		SendMsg(c.SendToType, c.SendTo, c.SentContent)
 	})
 	if err != nil {
-		log.Println("AddFunc", err)
+		logger.Log.Errorf("[cron add func failed][err:%v]", err)
 		return
 	}
 	//添加进TimeTaskList
@@ -96,10 +97,10 @@ func (c *CronJob) StartCronJob() {
 					c.cro.Start()
 					err := db.UpdateTaskStatus(2, c.TaskId)
 					if err != nil {
-						log.Println("UpdateTaskStatus failed", err)
+						logger.Log.Errorf("[db UpdateTaskStatus failed][err:%v]", err)
 						return
 					}
-					log.Println("任务开始", c.TaskName)
+					logger.Log.Errorf("[%s 定时任务开始]", c.TaskName)
 					break
 				}
 			}
@@ -109,10 +110,10 @@ func (c *CronJob) StartCronJob() {
 		c.cro.Start()
 		err := db.UpdateTaskStatus(2, c.TaskId)
 		if err != nil {
-			log.Println("UpdateTaskStatus failed", err)
+			logger.Log.Errorf("[db UpdateTaskStatus failed][err:%v]", err)
 			return
 		}
-		log.Println("任务开始", c.TaskName)
+		logger.Log.Errorf("[%s 定时任务开始]", c.TaskName)
 	}
 
 	//定时关闭
@@ -124,10 +125,10 @@ func (c *CronJob) StartCronJob() {
 					DelTimedTask(taskName)
 					err := db.UpdateTaskStatus(3, c.TaskId)
 					if err != nil {
-						log.Println("UpdateTaskStatus failed", err)
+						logger.Log.Errorf("[db UpdateTaskStatus failed][err:%v]", err)
 						return
 					}
-					log.Println("任务结束", c.TaskName)
+					logger.Log.Errorf("[%s 定时任务结束]", c.TaskName)
 					break
 				}
 			}
@@ -141,7 +142,7 @@ func (c *CronJob) StopCronJob() {
 	c.cro.Stop()
 	err := db.UpdateTaskStatus(3, c.TaskId)
 	if err != nil {
-		log.Println("db UpdateTaskStatus failed", err)
+		logger.Log.Errorf("[db UpdateTaskStatus failed][err:%v]", err)
 		return
 	}
 }

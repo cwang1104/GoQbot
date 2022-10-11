@@ -5,6 +5,7 @@ import (
 	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/viper"
 	"log"
+	"qbot/pkg/logger"
 )
 
 type globalConfig struct {
@@ -59,6 +60,12 @@ func init() {
 			panic(fmt.Errorf("unmarshal config file failed,err:%s", err))
 		}
 	})
+	logger.Log.Infof("配置文件初始化成功...")
+	logger.Log.Infof("当前机器人QQ号：%s", GlobalConf.QqBot.QqId)
+	var supportCity []string
+	for k, _ := range GlobalConf.QqBot.WeatherLocation {
+		supportCity = append(supportCity, k)
+	}
+	logger.Log.Infof("天气查询支持城市：%v", supportCity)
 
-	fmt.Println(GlobalConf)
 }

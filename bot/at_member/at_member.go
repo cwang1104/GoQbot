@@ -3,8 +3,8 @@ package at_member
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"qbot/bot/common/tools"
+	"qbot/pkg/logger"
 )
 
 var MemberList = map[int64]*[]MemberInfo{} //群成员信息，用于at全体成员，加载完成后只读，不涉及写，不用锁
@@ -62,21 +62,21 @@ func (g *GroupMemberDeal) GetMemberInfoList() (*MemberListResp, error) {
 	}
 	b, err := json.Marshal(sendMsg)
 	if err != nil {
-		log.Println("sendMsg json Marshal failed", err)
+		logger.Log.Errorf("[sendMsg json Marshal failed][error:%v]", err)
 		return nil, err
 	}
 
 	url := fmt.Sprintf("%s/get_group_member_list", tools.CqHttpBaseUrl)
 	respR, err := tools.HttpPost(url, b)
 	if err != nil {
-		log.Println("httpPost failed", err)
+		logger.Log.Errorf("[httpPost failed][err:%v]", err)
 		return nil, err
 	}
 
 	var memberResp MemberListResp
 	err = json.Unmarshal(respR, &memberResp)
 	if err != nil {
-		log.Println("Unmarshal,response err", err)
+		logger.Log.Errorf("[Unmarshal response failed][err：%v]", err)
 		return nil, err
 	}
 	return &memberResp, nil

@@ -1,26 +1,27 @@
 package cronJob
 
 import (
-	"log"
 	"qbot/db"
+	"qbot/pkg/logger"
 )
 
 func TimeTaskInit() error {
+	logger.Log.Infof("[start init bot time task...]")
 	tasks, err := db.GetRunningTask()
 	if err != nil {
-		log.Println("init bot get running task failed", err)
+		logger.Log.Errorf("[init bot get running task failed][err:%v]", err)
 		return err
 	}
 
 	if len(*tasks) == 0 {
-		log.Println("当前无运行中任务")
+		logger.Log.Infof("[定时任务初始化完成,当前无定时任务...]")
 		return nil
 	}
 
 	for _, task := range *tasks {
 		cronJob, err := NewCronJob(&task)
 		if err != nil {
-			log.Println("new cronJob failed", err)
+			logger.Log.Errorf("[startrunning task failed][err:%v]", err)
 			return err
 		}
 		cronJob.StartCronJob()

@@ -1,14 +1,15 @@
 package at_member
 
 import (
-	"log"
 	"qbot/bot/common/tools"
+	"qbot/pkg/logger"
 )
 
 func AtMeFunc(message *tools.MessageType) {
 	msg := "功能菜单：\n 1-查询天气 (输入 /天气)\n 2-艾特全体 (输入 /艾特全体)\n"
 	sendInfo := tools.GetGroupMsgStruct(msg, message.GroupId)
 	tools.MsgChan <- sendInfo
+	logger.Log.Infof("[user %s use AtMeFunction failed]", message.Sender.NickName)
 }
 
 // AtAllMember @全体成员
@@ -16,6 +17,7 @@ func AtAllMember(message *tools.MessageType) {
 	if message.Sender.Role == "member" {
 		sendMsg := tools.GetGroupMsgStruct("此功能仅群主及管理员可用", message.GroupId)
 		tools.MsgChan <- sendMsg
+		logger.Log.Infof("[user %s use AtAllMember]", message.Sender.NickName)
 		return
 	}
 
@@ -23,7 +25,7 @@ func AtAllMember(message *tools.MessageType) {
 	memberDeal := NewMemberDeal(message.GroupId, message.SelfId, false)
 	list, err := memberDeal.GetMemberInfoList()
 	if err != nil {
-		log.Println("GetMemberInfoList failed", err)
+		logger.Log.Errorf("[GetMemberInfoList failed][err:%v]", err)
 		return
 	}
 
@@ -45,4 +47,5 @@ func AtAllMember(message *tools.MessageType) {
 
 	sendMsg := tools.GetGroupMsgStruct(atAllstring, message.GroupId)
 	tools.MsgChan <- sendMsg
+	logger.Log.Infof("[user %s use AtAllMember success]", message.Sender.NickName)
 }

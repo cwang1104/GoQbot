@@ -9,6 +9,7 @@ import (
 	"qbot/db"
 	"qbot/middleware"
 	"qbot/pkg/e"
+	"qbot/pkg/logger"
 	"qbot/pkg/utils"
 	"time"
 )
@@ -82,6 +83,7 @@ func (t *TimedTaskService) AddCronJob(ctx *gin.Context) (res gin.H) {
 	payload := ctx.MustGet(middleware.AuthorizationPayloadKey).(*utils.Claims)
 	timingStrategyJson, err := json.Marshal(t.TimingStrategy)
 	if err != nil {
+		logger.Log.Errorf("%s", e.GetMsg(e.ERROR_UNMARSHAL_JSON))
 		res = e.ErrorResponse(e.ERROR_UNMARSHAL_JSON, err)
 		return
 	}
@@ -105,6 +107,7 @@ func (t *TimedTaskService) AddCronJob(ctx *gin.Context) (res gin.H) {
 
 	err = db.AddTimedTask(&taskInfo)
 	if err != nil {
+		logger.Log.Errorf("%s", e.GetMsg(e.ERROR_DATABASE_CREATE_FAIL))
 		res = e.ErrorResponse(e.ERROR_DATABASE_CREATE_FAIL, err)
 		return
 	}
@@ -112,12 +115,14 @@ func (t *TimedTaskService) AddCronJob(ctx *gin.Context) (res gin.H) {
 	newTaskInfo, err := db.GetTaskInfoByNameAndUserId(taskInfo.TaskName, taskInfo.CreatedId)
 	if err != nil {
 		res = e.ErrorResponse(e.ERROR_DATABASE_QUERY_FAIL, err)
+		logger.Log.Errorf("%s", e.GetMsg(e.ERROR_DATABASE_QUERY_FAIL))
 		return
 	}
 
 	timeJob, err := cronJob.NewCronJob(newTaskInfo)
 	if err != nil {
 		res = e.ErrorResponse(e.ERROR_CREATE_CRONJOB_FAIL, err)
+		logger.Log.Errorf("%s", e.GetMsg(e.ERROR_CREATE_CRONJOB_FAIL))
 		return
 	}
 	timeJob.StartCronJob()
@@ -132,6 +137,7 @@ func (t *TimedTaskService) StopTimeTask(ctx *gin.Context) (res gin.H) {
 	err := db.UpdateTaskStatusByUser(3, t.Id, payload.UID)
 	if err != nil {
 		res = e.ErrorResponse(e.ERROR_DATABASE_UPDATE_FAIL, err)
+		logger.Log.Errorf("%s", e.GetMsg(e.ERROR_DATABASE_UPDATE_FAIL))
 		return
 	}
 
@@ -140,6 +146,7 @@ func (t *TimedTaskService) StopTimeTask(ctx *gin.Context) (res gin.H) {
 
 	if !exist {
 		res = e.ErrorResponse(e.ERROR_CROBJOB_NOT_EXIST, nil)
+		logger.Log.Errorf("%s", e.GetMsg(e.ERROR_CROBJOB_NOT_EXIST))
 		return
 	}
 	timeTask.StopCronJob()
@@ -162,8 +169,9 @@ func (t *TimedTaskService) GetUserTaskList(ctx *gin.Context) (res gin.H) {
 		fmt.Println(t.Status)
 		tasks, err = db.GetUserTaskListStatus(payload.UID, t.PageSize, offset, t.Status)
 	}
-	if err != nil && err != io.EOF {
+	if err != nil {
 		res = e.ErrorResponse(e.ERROR_DATABASE_QUERY_FAIL, err)
+		logger.Log.Errorf("%s", e.GetMsg(e.ERROR_DATABASE_QUERY_FAIL))
 		return
 	}
 	var tasksResp []TaskListResp
@@ -195,6 +203,7 @@ func (t *TimedTaskService) GetTaskInfo() (res gin.H) {
 	task, err := db.GetTaskInfoById(t.Id)
 	if err != nil && err != io.EOF {
 		e.ErrorResponse(e.ERROR_DATABASE_QUERY_FAIL, err)
+		logger.Log.Errorf("%s", e.GetMsg(e.ERROR_DATABASE_QUERY_FAIL))
 		return
 	}
 

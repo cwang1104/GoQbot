@@ -2,10 +2,10 @@ package ws
 
 import (
 	"github.com/gorilla/websocket"
-	"log"
 	"net/http"
 	"qbot/bot"
 	"qbot/bot/common/tools"
+	"qbot/pkg/logger"
 	"time"
 )
 
@@ -23,11 +23,11 @@ func BotWsHandler(w http.ResponseWriter, r *http.Request) {
 	var conn *websocket.Conn
 	conn, err := wsupgreder.Upgrade(w, r, nil)
 	if err != nil {
-		log.Println("ws升级失败", err)
+		logger.Log.Errorf("Upgrade ws failed,err:%v", err)
 		return
 	}
 
-	log.Println("接收开始")
+	logger.Log.Infof("ws connect success,start receiving messages... ")
 
 	//发送消息均为异步发送
 	go func() {
@@ -39,7 +39,7 @@ func BotWsHandler(w http.ResponseWriter, r *http.Request) {
 	for {
 		_, data, err := conn.ReadMessage()
 		if err != nil {
-			log.Println("read msg failed", err)
+			logger.Log.Errorf("read msg failed,err:%v", err)
 			return
 		}
 		//消息处理

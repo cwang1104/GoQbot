@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"qbot/pkg/logger"
 )
 
 type MessageSender struct {
@@ -31,13 +32,13 @@ func NewMessageSender(messageType string, sendToId int64, message string) *Messa
 func (m *MessageSender) SendMsg() error {
 	b, err := json.Marshal(m)
 	if err != nil {
-		log.Println("json marshal failed", err)
+		logger.Log.Errorf("[json marshal failed][err:%v][data:%+v]", err, m)
 		return err
 	}
 	url := fmt.Sprintf("%s/send_msg", CqHttpBaseUrl)
 	content, err := HttpPost(url, b)
 	if err != nil {
-		log.Println("http post failed", err)
+		logger.Log.Errorf("[http post failed][err:%v]", err)
 		return err
 	}
 	log.Println(string(content))
